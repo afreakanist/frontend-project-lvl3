@@ -7,37 +7,37 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'main.js',
-      publicPath: ''
+    publicPath: '',
   },
   mode: process.env.NODE_ENV || 'development',
   devServer: {
     static: path.resolve(__dirname, './dist'),
     compress: true,
     port: 8080,
-    open: true
+    open: true,
   },
   module: {
     rules: [{
       test: /\.js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ["@babel/preset-env"],
-          },
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env'],
         },
-        exclude: /node_modules/
       },
-      { test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] },
-      {
-        test: /\.(png|svg|jpg|gif|woff(2)?|eot|ttf|otf)$/,
-        type: 'asset/resource'
-      },
-    ]
+      exclude: /node_modules/,
+    },
+    { test: /\.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] },
+    {
+      test: /\.(png|svg|jpg|gif|woff(2)?|eot|ttf|otf)$/,
+      type: 'asset/resource',
+    },
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './index.html'
+      template: './index.html',
     }),
     new CleanWebpackPlugin(),
-  ]
-}
+  ],
+};
