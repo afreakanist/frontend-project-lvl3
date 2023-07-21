@@ -1,0 +1,9 @@
+{
+  "root": true,
+  "plugins": ["babel"], 
+  "parser": "@babel/eslint-parser",
+  "extends": "airbnb",
+  "rules": {
+    "no-console": "off"
+  }
+}
