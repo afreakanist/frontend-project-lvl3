@@ -1,2 +1,2 @@
 import 'bootstrap'; // js
-import 'bootstrap/dist/css/bootstrap.min.css'; // css
+import './index.css'; // css
