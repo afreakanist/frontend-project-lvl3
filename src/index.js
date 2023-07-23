@@ -10,6 +10,9 @@ const messageElement = document.querySelector('p.feedback');
 // const postsContainer = document.querySelector('div.posts');
 const listContainer = document.querySelector('ul.list-group');
 
+// temporary feed list dummy
+const feedList = [];
+
 const urlSchema = string().trim().url().required();
 
 const showSuccessMessage = () => {
@@ -46,14 +49,7 @@ const addFeedItem = (url) => {
   listContainer.prepend(generateFeedItem(url));
 };
 
-const isDuplicate = (url) => {
-  return feedList.some((entry) => entry === url); // true if is duplicate
-};
-
-// temporary feed list dummy
-const feedList = [];
-
-// rss url example: http://rss.art19.com/the-daily
+const isDuplicate = (url) => feedList.some((entry) => entry === url);
 
 formElement.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -81,6 +77,6 @@ formElement.addEventListener('submit', async (event) => {
       })
       .catch((error) => {
         showErrorMessage(error);
-      })
+      });
   }
 });
