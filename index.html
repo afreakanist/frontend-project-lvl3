@@ -8,6 +8,21 @@
     <title>RSS reader</title>
   </head>
   <body class="d-flex flex-column min-vh-100">
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modal" aria-modal="true" style="display: none;">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+            <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-break"></div>
+          <div class="modal-footer">
+            <a class="btn btn-primary full-article" href="#" role="button" target="_blank" rel="noopener noreferrer"></a>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"></button>
+          </div>
+        </div>
+      </div>
+    </div>
     <main class="flex-grow-1">
       <section class="container-fluid bg-dark p-5">
         <div class="row">
@@ -47,13 +62,18 @@
       </section>
       <section class="container-fluid container-xxl p-5">
         <div class="row">
-          <div class="col-md-10 col-lg-8 order-1 mx-auto posts"></div>
-          <div
-            class="col-md-10 col-lg-4 mx-auto order-0 order-lg-1 feeds"
-          >
-          <!-- temporary list elem to collect valid urls -->
-          <ul class="list-group"></ul>
-        </div>
+          <div class="col-md-10 col-lg-8 order-1 mx-auto posts">
+            <div class="card-body">
+              <h2 class="posts__header card-title h4"></h2>
+            </div>
+            <ul class="posts__list list-group border-0 rounded-0"></ul>
+          </div>
+          <div class="col-md-10 col-lg-4 mx-auto order-0 order-lg-1 feeds">
+            <div class="card-body">
+              <h2 class="feeds___header card-title h4"></h2>
+            </div>
+            <ul class="feeds__list list-group border-0 rounded-0"></ul>
+          </div>
         </div>
       </section>
     </main>
@@ -68,5 +88,19 @@
         </div>
       </div>
     </footer>
+
+    <template id="feed-template">
+      <li class="feed list-group-item border-0 border-end-0">
+        <h3 class="feed__title h6 m-0"></h3>
+        <p class="feed__description m-0 small text-black-50"></p>
+      </li>
+    </template>
+
+    <template id="post-template">
+      <li class="post list-group-item d-flex justify-content-between align-items-start border-0 border-end-0">
+        <a href="#" class="post__link fw-bold" target="_blank" rel="noopener noreferrer"></a>
+        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal"></button>
+      </li>
+    </template>
   </body>
 </html>
