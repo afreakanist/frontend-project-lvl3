@@ -1,11 +1,17 @@
+import i18next from 'i18next';
 import {
   inputElement,
   messageElement,
-  listContainer,
+  feedListElement,
+  postsListElement,
+  modalHeader,
+  modalTextElement,
+  modalReadArticleLink,
   feedList,
 } from './constants';
 
-// helper functions
+// TO DO: func to (re)render texts ???
+
 export const showSuccessMessage = () => {
   inputElement.classList.remove('is-invalid');
   messageElement.classList.remove('text-danger');
@@ -20,24 +26,56 @@ export const showErrorMessage = (error) => {
   messageElement.textContent = error;
 };
 
-// export const hideError = () => {
-//   inputElement.classList.remove('is-invalid');
-//   messageElement.textContent = '';
-// };
+const getTemplate = (selector) => {
+  const element = document
+    .querySelector(`#${selector}-template`)
+    .content
+    .querySelector(`.${selector}`)
+    .cloneNode(true);
 
-export const generateFeedItem = (url) => {
-  const feedItem = document.createElement('li');
-  feedItem.classList.add('list-group-item');
-  const linkElem = document.createElement('a');
-  linkElem.classList.add('link-primary');
-  linkElem.textContent = url;
-  linkElem.setAttribute('href', url);
-  feedItem.prepend(linkElem);
-  return feedItem;
+  return element;
 };
 
-export const addFeedItem = (url) => {
-  listContainer.prepend(generateFeedItem(url));
+const generateFeedElement = ({ title, description }) => {
+  const feedElement = getTemplate('feed');
+
+  const feedTitle = feedElement.querySelector('.feed__title');
+  const feedDescription = feedElement.querySelector('.feed__description');
+
+  feedTitle.textContent = title;
+  feedDescription.textContent = description;
+
+  return feedElement;
 };
+
+export const addFeedElement = (data) => {
+  feedListElement.prepend(generateFeedElement(data));
+};
+
+const generatePostElement = ({ link, title, description }) => {
+  const postElement = getTemplate('post');
+
+  const postLink = postElement.querySelector('.post__link');
+  const postBtn = postElement.querySelector('button');
+
+  postLink.setAttribute('href', link);
+  postLink.textContent = title;
+  postBtn.textContent = i18next.t('seePostInfoBtn');
+
+  postBtn.addEventListener('click', () => {
+    modalHeader.textContent = title;
+    modalTextElement.textContent = description;
+    modalReadArticleLink.setAttribute('href', link);
+  });
+
+  return postElement;
+};
+
+export const addPostElement = (data) => {
+  postsListElement.prepend(generatePostElement(data));
+};
+
+// TO DO: watch feedlist.length and trigger func
+// to add text / visibility to feeds + posts section headers
 
 export const isDuplicate = (url) => feedList.some((entry) => entry === url);
