@@ -6,6 +6,7 @@ import {
   addPostElement,
   showErrorMessage,
   showSuccessMessage,
+  showSectionHeaders
 } from './render';
 import { inputElement } from './constants';
 
@@ -33,26 +34,30 @@ const generateProxyUrl = (url) => {
 // RSS parsing
 const parseRSSData = (data) => {
   const content = new window.DOMParser().parseFromString(data, 'text/xml');
-  if (content.querySelector('parsererror')) {
-    throw new Error(i18next.t('error.parsing'));
-  } else {
-    // feeds
-    const title = content.querySelector('title').textContent;
-    const description = content.querySelector('description').textContent;
-    // posts
-    const items = content.querySelectorAll('item');
-    const posts = Array.from(items).map((elem) => ({
-      link: elem.querySelector('link').textContent,
-      title: elem.querySelector('title').textContent,
-      description: elem.querySelector('description').textContent,
-    }));
+  const parsingError = content.querySelector('parsererror');
 
-    return {
-      feed: { title, description },
-      posts: [...posts],
-    };
-  }
+  if (parsingError) {
+    throw new Error(`${i18next.t('error.parsing')} ${parsingError.textContent}`);
+  } 
+  // feeds
+  const title = content.querySelector('title').textContent;
+  const description = content.querySelector('description').textContent;
+  // posts
+  const items = content.querySelectorAll('item');
+  const posts = Array.from(items).map((elem) => ({
+    link: elem.querySelector('link').textContent,
+    title: elem.querySelector('title').textContent,
+    description: elem.querySelector('description').textContent,
+  }));
+
+  return {
+    feed: { title, description },
+    posts: [...posts],
+  };
 };
+
+const getRSS = (url) => axios.get(url)
+  .then((response) => parseRSSData(response.data.contents));
 
 // event handler
 export const handleFormSubmit = async (event, watchedState) => {
@@ -69,21 +74,15 @@ export const handleFormSubmit = async (event, watchedState) => {
     });
 
   if (isValid) {
-    axios.get(generateProxyUrl(url))
-      .then((response) => {
-        if (response.status >= 200 && response.status < 300) {
-          watchedState.ui.feedback.status = 'success';
-          const { feed, posts } = parseRSSData(response.data.contents);
-
-          watchedState.rssUrls.push(url);
-          watchedState.feeds.unshift(feed);
-          posts.forEach((postData) => {
-            watchedState.posts.unshift(postData);
-          });
-          // TO DO: make posts and feeds section headers visible
-        } else {
-          throw new Error(i18next.t('error.generic', { error: response.status }));
-        }
+    getRSS(generateProxyUrl(url))
+      .then(({ feed, posts }) => {
+        watchedState.rssUrls.push(url);
+        watchedState.feeds.unshift(feed);
+        posts.forEach((postData) => {
+          watchedState.posts.unshift(postData);
+        });
+        watchedState.ui.feedback.status = 'success';
+        watchedState.ui.headers = true;
       })
       .catch((error) => {
         watchedState.ui.feedback.status = error;
@@ -94,16 +93,27 @@ export const handleFormSubmit = async (event, watchedState) => {
 };
 
 // render changes
-export const renderChanges = (path, value) => {
-  if (path === 'feeds') {
-    addFeedElement(value[0]);
-  } else if (path === 'posts') {
-    addPostElement(value[0]);
-  } else if (path === 'ui.feedback.status') {
-    if (value === 'success') {
-      showSuccessMessage();
-    } else {
-      showErrorMessage(value);
-    }
+export const renderChanges = (path, value, previousValue) => {
+  switch (path) {
+    case ('feeds'):
+      addFeedElement(value[0]);
+      break;
+    case('posts'):
+      addPostElement(value[0]);
+      break;
+    case('ui.feedback.status'):
+      if (value === 'success') {
+        showSuccessMessage();
+      } else {
+        showErrorMessage(value);
+      }
+      break;
+    case('ui.headers'):
+      if (value !== previousValue) {
+        showSectionHeaders();
+      }
+      break;
+    default:
+      return;
   }
 };

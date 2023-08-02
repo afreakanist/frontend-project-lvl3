@@ -10,7 +10,9 @@ import {
   submitButton,
   exampleElement,
   messageElement,
+  feedsHeader,
   feedListElement,
+  postsHeader,
   postsListElement,
   footerCreatedElement,
   authorLinkElement,
@@ -57,6 +59,12 @@ export const showErrorMessage = (error) => {
   messageElement.classList.remove('text-success');
   messageElement.classList.add('text-danger');
   messageElement.textContent = error;
+};
+
+export const showSectionHeaders = () => {
+  console.log('showSectionHeaders()', feedsHeader, postsHeader)
+  feedsHeader.textContent = i18next.t('feedsHeader');
+  postsHeader.textContent = i18next.t('postsHeader');
 };
 
 const getTemplate = (selector) => {
