@@ -17,5 +17,3 @@ export const modalHeader = document.querySelector('.modal-title');
 export const modalTextElement = document.querySelector('.modal-body');
 export const modalReadArticleLink = document.querySelector('.modal-footer > a');
 export const modalCloseButton = document.querySelector('.modal-footer > button');
-// temporary feed list dummy
-export const feedList = [];

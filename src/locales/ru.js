@@ -15,7 +15,8 @@ export default {
     modalReadArticle: 'Читать полностью',
     'error.generic': 'Что-то пошло не так... Код ошибки: {{error}}',
     'error.validation': 'Ошибка валидации.',
-    'error.invalidURL': 'Your link seems to be invalid.',
+    'error.invalidURL': 'Некорректная сслыка.',
+    'error.parsing': 'Похоже, что это не RSS ссылка.',
     'error.duplicate': 'Вы уже добавили этот фид раньше.',
   },
 };

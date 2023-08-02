@@ -16,6 +16,7 @@ export default {
     'error.generic': 'Something went wrong... Error: {{error}}',
     'error.validation': 'Validation Error.',
     'error.invalidURL': 'Your link seems to be invalid.',
+    'error.parsing': 'Your link doesn\'t seem to be an RSS link.',
     'error.duplicate': 'You have already added this feed!',
   },
 };
