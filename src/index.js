@@ -13,7 +13,7 @@ const app = () => {
       feedback: {
         status: '',
       },
-      headers: false
+      headers: false,
     },
   };
 

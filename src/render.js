@@ -62,7 +62,6 @@ export const showErrorMessage = (error) => {
 };
 
 export const showSectionHeaders = () => {
-  console.log('showSectionHeaders()', feedsHeader, postsHeader)
   feedsHeader.textContent = i18next.t('feedsHeader');
   postsHeader.textContent = i18next.t('postsHeader');
 };

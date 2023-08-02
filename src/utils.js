@@ -6,7 +6,7 @@ import {
   addPostElement,
   showErrorMessage,
   showSuccessMessage,
-  showSectionHeaders
+  showSectionHeaders,
 } from './render';
 import { inputElement } from './constants';
 
@@ -38,7 +38,7 @@ const parseRSSData = (data) => {
 
   if (parsingError) {
     throw new Error(`${i18next.t('error.parsing')} ${parsingError.textContent}`);
-  } 
+  }
   // feeds
   const title = content.querySelector('title').textContent;
   const description = content.querySelector('description').textContent;
@@ -98,22 +98,22 @@ export const renderChanges = (path, value, previousValue) => {
     case ('feeds'):
       addFeedElement(value[0]);
       break;
-    case('posts'):
+    case ('posts'):
       addPostElement(value[0]);
       break;
-    case('ui.feedback.status'):
+    case ('ui.feedback.status'):
       if (value === 'success') {
         showSuccessMessage();
       } else {
         showErrorMessage(value);
       }
       break;
-    case('ui.headers'):
+    case ('ui.headers'):
       if (value !== previousValue) {
         showSectionHeaders();
       }
       break;
     default:
-      return;
+      showErrorMessage(i18next.t('error.generic'));
   }
 };
