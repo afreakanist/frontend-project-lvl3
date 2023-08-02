@@ -14,9 +14,21 @@ setLocale({
   string: {
     url: ({ url }) => ({ type: 'error.validation', message: 'error.invalidURL', values: { url } }),
   },
+  mixed: {
+    notOneOf: ({ notOneOf }) => ({ type: 'error.validation', message: 'error.duplicate', values: { notOneOf } }),
+  },
 });
 
-const urlSchema = string().trim().url().required();
+// proxy
+const baseProxyUrl = 'https://allorigins.hexlet.app/get';
+
+const generateProxyUrl = (url) => {
+  const proxyUrl = new URL(baseProxyUrl);
+
+  proxyUrl.searchParams.set('url', url);
+
+  return proxyUrl.toString();
+};
 
 // RSS parsing
 const parseRSSData = (data) => {
@@ -46,34 +58,29 @@ const parseRSSData = (data) => {
 export const handleFormSubmit = async (event, watchedState) => {
   event.preventDefault();
 
-  const url = await urlSchema.validate(inputElement.value)
+  const urlSchema = string().trim().url().required()
+    .notOneOf(watchedState.rssUrls);
+  const url = inputElement.value;
+
+  const isValid = await urlSchema.validate(url)
     .catch((error) => {
       const { type, message } = error.errors[0];
       watchedState.ui.feedback.status = `${i18next.t(type)} ${i18next.t(message)}`;
     });
 
-  if (url) {
-    axios.get(`https://allorigins.hexlet.app/get?url=${url}`)
+  if (isValid) {
+    axios.get(generateProxyUrl(url))
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
-          if (!watchedState.feeds.some((entry) => entry.rssURL === response.data.status.url)) {
-            watchedState.ui.feedback.status = 'success';
-            const { feed, posts } = parseRSSData(response.data.contents);
+          watchedState.ui.feedback.status = 'success';
+          const { feed, posts } = parseRSSData(response.data.contents);
 
-            watchedState.feeds.unshift({
-              rssURL: response.data.status.url,
-              ...feed,
-            });
-            posts.forEach((postData) => {
-              watchedState.posts.unshift({
-                rssURL: response.data.status.url,
-                ...postData,
-              });
-            });
-            // TO DO: make posts and feeds section headers visible
-          } else {
-            throw new Error(i18next.t('error.duplicate'));
-          }
+          watchedState.rssUrls.push(url);
+          watchedState.feeds.unshift(feed);
+          posts.forEach((postData) => {
+            watchedState.posts.unshift(postData);
+          });
+          // TO DO: make posts and feeds section headers visible
         } else {
           throw new Error(i18next.t('error.generic', { error: response.status }));
         }
@@ -82,10 +89,12 @@ export const handleFormSubmit = async (event, watchedState) => {
         watchedState.ui.feedback.status = error;
       });
   }
+
+  // TO DO: updatePosts();
 };
 
 // render changes
-export const renderChanges = (path, value, previousValue) => {
+export const renderChanges = (path, value) => {
   if (path === 'feeds') {
     addFeedElement(value[0]);
   } else if (path === 'posts') {

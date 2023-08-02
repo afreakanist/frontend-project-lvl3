@@ -6,6 +6,7 @@ import { renderChanges, handleFormSubmit } from './utils';
 
 const app = () => {
   const state = {
+    rssUrls: [],
     feeds: [],
     posts: [],
     ui: {
