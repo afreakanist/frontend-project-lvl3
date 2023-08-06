@@ -95,18 +95,30 @@ export const addFeedElement = (data) => {
 const generatePostElement = ({ link, title, description }) => {
   const postElement = getTemplate('post');
 
-  const postLink = postElement.querySelector('.post__link');
+  const postLink = postElement.querySelector('a');
   const postBtn = postElement.querySelector('button');
 
   postLink.setAttribute('href', link);
   postLink.textContent = title;
   postBtn.textContent = i18next.t('seePostInfoBtn');
 
+  let isRead = false;
+
   postBtn.addEventListener('click', () => {
     modalHeader.textContent = title;
     modalTextElement.textContent = description;
     modalReadArticleLink.setAttribute('href', link);
+    if (!isRead) {
+      isRead = true;
+      postLink.classList.remove('fw-bold');
+      postLink.classList.add('link-secondary');
+    }
   });
+
+  postLink.addEventListener('click', () => {
+    postLink.classList.remove('fw-bold');
+    postLink.classList.add('link-secondary');
+  }, { once: true });
 
   return postElement;
 };
