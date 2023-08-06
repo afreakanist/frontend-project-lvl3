@@ -1,3 +1,5 @@
 # Practice project: RSS reader
 
-Click [here](https://rss-reader-afreakanist.vercel.app/)
+![GitHub Actions](https://github.com/afreakanist/frontend-project-lvl3/actions/workflows/main.yml/badge.svg)
+
+To see deployment, click [here](https://rss-reader-afreakanist.vercel.app/)
