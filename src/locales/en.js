@@ -13,7 +13,7 @@ export default {
     seePostInfoBtn: 'See more',
     modalCloseBtn: 'Close',
     modalReadArticle: 'Read article',
-    'error.generic': 'Something went wrong... Error: {{error}}',
+    'error.generic': 'Something went wrong...',
     'error.validation': 'Validation Error.',
     'error.invalidURL': 'Your link seems to be invalid.',
     'error.parsing': 'Your link doesn\'t seem to be an RSS link.',

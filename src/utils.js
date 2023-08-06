@@ -1,6 +1,7 @@
 import { string, setLocale } from 'yup';
 import axios from 'axios';
 import i18next from 'i18next';
+import { differenceWith, uniqueId } from 'lodash';
 import {
   addFeedElement,
   addPostElement,
@@ -20,7 +21,6 @@ setLocale({
   },
 });
 
-// proxy
 const baseProxyUrl = 'https://allorigins.hexlet.app/get';
 
 const generateProxyUrl = (url) => {
@@ -31,7 +31,6 @@ const generateProxyUrl = (url) => {
   return proxyUrl.toString();
 };
 
-// RSS parsing
 const parseRSSData = (data) => {
   const content = new window.DOMParser().parseFromString(data, 'text/xml');
   const parsingError = content.querySelector('parsererror');
@@ -45,6 +44,7 @@ const parseRSSData = (data) => {
   // posts
   const items = content.querySelectorAll('item');
   const posts = Array.from(items).map((elem) => ({
+    id: uniqueId(),
     link: elem.querySelector('link').textContent,
     title: elem.querySelector('title').textContent,
     description: elem.querySelector('description').textContent,
@@ -58,6 +58,29 @@ const parseRSSData = (data) => {
 
 const getRSS = (url) => axios.get(url)
   .then((response) => parseRSSData(response.data.contents));
+
+const getNewPosts = (watchedState) => {
+  watchedState.rssUrls.forEach((url) => {
+    getRSS(generateProxyUrl(url)).then(({ posts }) => {
+      const newPosts = differenceWith(
+        posts,
+        watchedState.posts,
+        (newPost, savedPost) => newPost.title === savedPost.title,
+      );
+      if (newPosts.length > 0) {
+        newPosts.forEach((post) => {
+          watchedState.posts.unshift(post);
+        });
+      }
+    });
+  });
+};
+
+const updatePosts = (watchedState) => {
+  getNewPosts(watchedState);
+
+  setTimeout(updatePosts, 5000, watchedState);
+};
 
 // event handler
 export const handleFormSubmit = async (event, watchedState) => {
@@ -89,10 +112,9 @@ export const handleFormSubmit = async (event, watchedState) => {
       });
   }
 
-  // TO DO: updatePosts();
+  updatePosts(watchedState);
 };
 
-// render changes
 export const renderChanges = (path, value, previousValue) => {
   switch (path) {
     case ('feeds'):
@@ -114,6 +136,6 @@ export const renderChanges = (path, value, previousValue) => {
       }
       break;
     default:
-      showErrorMessage(i18next.t('error.generic'));
+      break;
   }
 };

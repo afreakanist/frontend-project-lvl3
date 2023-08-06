@@ -13,7 +13,7 @@ export default {
     seePostInfoBtn: 'Просмотр',
     modalCloseBtn: 'Закрыть',
     modalReadArticle: 'Читать полностью',
-    'error.generic': 'Что-то пошло не так... Код ошибки: {{error}}',
+    'error.generic': 'Что-то пошло не так...',
     'error.validation': 'Ошибка валидации.',
     'error.invalidURL': 'Некорректная сслыка.',
     'error.parsing': 'Похоже, что это не RSS ссылка.',
