@@ -1,0 +1,22 @@
+export default {
+  translation: {
+    header: 'RSS reader',
+    lead: 'Start using RSS today! It\'s easy and pretty.',
+    inputPlaceholder: 'RSS URL',
+    submitBtn: 'Add',
+    linkExample: 'Example: https://example.com/articles.rss',
+    footerCreated: 'Created by',
+    author: 'Anna Korotkikh',
+    successMessage: 'RSS was successfully loaded',
+    feedsHeader: 'Feeds',
+    postsHeader: 'Posts',
+    seePostInfoBtn: 'See more',
+    modalCloseBtn: 'Close',
+    modalReadArticle: 'Read article',
+    'error.generic': 'Something went wrong...',
+    'error.network': 'Network error',
+    'error.invalidURL': 'Link must be a valid URL,',
+    'error.parsing': 'Source doesn\'t have valid RSS',
+    'error.duplicate': 'RSS has already been loaded',
+  },
+};
