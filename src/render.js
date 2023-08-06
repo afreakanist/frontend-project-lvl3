@@ -50,7 +50,7 @@ export const showSuccessMessage = () => {
   inputElement.classList.remove('is-invalid');
   messageElement.classList.remove('text-danger');
   messageElement.classList.add('text-success');
-  messageElement.textContent = 'RSS was successfully loaded!';
+  messageElement.textContent = i18next.t('successMessage');
   formElement.reset();
 };
 
