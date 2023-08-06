@@ -29,6 +29,7 @@ const generateProxyUrl = (url) => {
   const proxyUrl = new URL(baseProxyUrl);
 
   proxyUrl.searchParams.set('url', url);
+  proxyUrl.searchParams.set('disableCache', 'true');
 
   return proxyUrl.toString();
 };
