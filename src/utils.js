@@ -11,6 +11,8 @@ import {
 } from './render';
 import { inputElement } from './constants';
 
+/* eslint-disable no-param-reassign */
+
 // validation
 setLocale({
   string: {
