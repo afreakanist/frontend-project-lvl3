@@ -25,8 +25,8 @@ import {
 // TO DO: func to (re)render texts ???
 // localization
 i18next.init({
-  lng: 'en',
-  fallbackLng: 'en',
+  lng: 'ru',
+  fallbackLng: 'ru',
   debug: true,
   resources: {
     en,

@@ -92,8 +92,8 @@ export const handleFormSubmit = async (event, watchedState) => {
 
   const isValid = await urlSchema.validate(url)
     .catch((error) => {
-      const { type, message } = error.errors[0];
-      watchedState.ui.feedback.status = `${i18next.t(type)} ${i18next.t(message)}`;
+      const { message } = error.errors[0];
+      watchedState.ui.feedback.status = `${i18next.t(message)}`;
     });
 
   if (isValid) {
