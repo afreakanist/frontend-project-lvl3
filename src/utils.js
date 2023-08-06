@@ -111,7 +111,11 @@ export const handleFormSubmit = async (event, watchedState) => {
         watchedState.ui.headers = true;
       })
       .catch((error) => {
-        watchedState.ui.feedback.status = error;
+        if (axios.isAxiosError(error)) {
+          watchedState.ui.feedback.status = i18next.t('error.network');
+        } else {
+          watchedState.ui.feedback.status = error;
+        }
       });
   }
 
