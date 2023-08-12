@@ -59,12 +59,10 @@ const parseRSSData = (data) => {
   };
 };
 
-const normalizePost = (post) => {
-  return {
-    ...post,
-    id: uniqueId('post'),
-  };
-};
+const normalizePost = (post) => ({
+  ...post,
+  id: uniqueId('post'),
+});
 
 const getRSS = (url) => axios.get(url)
   .then((response) => parseRSSData(response.data.contents));
