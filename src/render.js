@@ -58,7 +58,7 @@ export const showErrorMessage = (error) => {
   inputElement.classList.add('is-invalid');
   messageElement.classList.remove('text-success');
   messageElement.classList.add('text-danger');
-  messageElement.textContent = error;
+  messageElement.textContent = i18next.t(error);
 };
 
 export const showSectionHeaders = () => {

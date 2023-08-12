@@ -1,6 +1,5 @@
 import { string, setLocale } from 'yup';
 import axios from 'axios';
-import i18next from 'i18next';
 import { differenceWith, uniqueId } from 'lodash';
 import {
   addFeedElement,
@@ -39,7 +38,9 @@ const parseRSSData = (data) => {
   const parsingError = content.querySelector('parsererror');
 
   if (parsingError) {
-    throw new Error(`${i18next.t('error.parsing')} ${parsingError.textContent}`);
+    const error = new Error(parsingError.textContent);
+    error.isParsingError = true;
+    throw error;
   }
   // feeds
   const title = content.querySelector('title').textContent;
@@ -96,7 +97,7 @@ export const handleFormSubmit = async (event, watchedState) => {
   const isValid = await urlSchema.validate(url)
     .catch((error) => {
       const { message } = error.errors[0];
-      watchedState.ui.feedback.status = `${i18next.t(message)}`;
+      watchedState.ui.feedback.status = message;
     });
 
   if (isValid) {
@@ -112,9 +113,12 @@ export const handleFormSubmit = async (event, watchedState) => {
       })
       .catch((error) => {
         if (axios.isAxiosError(error)) {
-          watchedState.ui.feedback.status = i18next.t('error.network');
+          watchedState.ui.feedback.status = 'error.network';
+        } else if (error.isParsingError) {
+          watchedState.ui.feedback.status = 'error.parsing';
+          console.error(error);
         } else {
-          watchedState.ui.feedback.status = error;
+          watchedState.ui.feedback.status = 'error.generic';
         }
       });
   }
