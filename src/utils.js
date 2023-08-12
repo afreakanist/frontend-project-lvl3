@@ -48,7 +48,6 @@ const parseRSSData = (data) => {
   // posts
   const items = content.querySelectorAll('item');
   const posts = Array.from(items).map((elem) => ({
-    id: uniqueId(),
     link: elem.querySelector('link').textContent,
     title: elem.querySelector('title').textContent,
     description: elem.querySelector('description').textContent,
@@ -57,6 +56,13 @@ const parseRSSData = (data) => {
   return {
     feed: { title, description },
     posts: [...posts],
+  };
+};
+
+const normalizePost = (post) => {
+  return {
+    ...post,
+    id: uniqueId('post'),
   };
 };
 
@@ -72,7 +78,8 @@ const getNewPosts = (watchedState) => {
         (newPost, savedPost) => newPost.title === savedPost.title,
       );
       if (newPosts.length > 0) {
-        newPosts.forEach((post) => {
+        const normalizedPosts = newPosts.map((post) => normalizePost(post));
+        normalizedPosts.forEach((post) => {
           watchedState.posts.unshift(post);
         });
       }
@@ -105,7 +112,8 @@ export const handleFormSubmit = async (event, watchedState) => {
       .then(({ feed, posts }) => {
         watchedState.rssUrls.push(url);
         watchedState.feeds.unshift(feed);
-        posts.forEach((postData) => {
+        const normalizedPosts = posts.map((post) => normalizePost(post));
+        normalizedPosts.forEach((postData) => {
           watchedState.posts.unshift(postData);
         });
         watchedState.ui.feedback.status = 'success';
