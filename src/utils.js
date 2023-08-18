@@ -1,14 +1,7 @@
 import { string, setLocale } from 'yup';
 import axios from 'axios';
 import { differenceWith, uniqueId } from 'lodash';
-import {
-  addFeedElement,
-  addPostElement,
-  showErrorMessage,
-  showSuccessMessage,
-  showSectionHeaders,
-} from './render';
-import { inputElement } from './constants';
+import elements from './constants';
 
 /* eslint-disable no-param-reassign */
 
@@ -92,12 +85,12 @@ const updatePosts = (watchedState) => {
 };
 
 // event handler
-export const handleFormSubmit = async (event, watchedState) => {
+export default async (event, watchedState) => {
   event.preventDefault();
 
   const urlSchema = string().trim().url().required()
     .notOneOf(watchedState.rssUrls);
-  const url = inputElement.value;
+  const url = elements.inputElement.value;
 
   const isValid = await urlSchema.validate(url)
     .catch((error) => {
@@ -120,39 +113,16 @@ export const handleFormSubmit = async (event, watchedState) => {
       .catch((error) => {
         if (axios.isAxiosError(error)) {
           watchedState.ui.feedback.status = 'error.network';
+          console.error(error);
         } else if (error.isParsingError) {
           watchedState.ui.feedback.status = 'error.parsing';
           console.error(error);
         } else {
           watchedState.ui.feedback.status = 'error.generic';
+          console.error(error);
         }
       });
   }
 
   updatePosts(watchedState);
-};
-
-export const renderChanges = (path, value, previousValue) => {
-  switch (path) {
-    case ('feeds'):
-      addFeedElement(value[0]);
-      break;
-    case ('posts'):
-      addPostElement(value[0]);
-      break;
-    case ('ui.feedback.status'):
-      if (value === 'success') {
-        showSuccessMessage();
-      } else {
-        showErrorMessage(value);
-      }
-      break;
-    case ('ui.headers'):
-      if (value !== previousValue) {
-        showSectionHeaders();
-      }
-      break;
-    default:
-      break;
-  }
 };

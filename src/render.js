@@ -1,69 +1,23 @@
-import i18next from 'i18next';
-import en from './locales/en';
-import ru from './locales/ru';
-import {
-  headerElement,
-  leadElement,
-  inputElement,
-  inputLabelElement,
-  formElement,
-  submitButton,
-  exampleElement,
-  messageElement,
-  feedsHeader,
-  feedListElement,
-  postsHeader,
-  postsListElement,
-  footerCreatedElement,
-  authorLinkElement,
-  modalHeader,
-  modalTextElement,
-  modalReadArticleLink,
-  modalCloseButton,
-} from './constants';
+import elements from './constants';
 
-// TO DO: func to (re)render texts ???
-// localization
-i18next.init({
-  lng: 'ru',
-  fallbackLng: 'ru',
-  debug: true,
-  resources: {
-    en,
-    ru,
-  },
-});
-
-// TO DO: move it to some function with lang parameter (en default)
-headerElement.textContent = i18next.t('header');
-leadElement.textContent = i18next.t('lead');
-inputElement.setAttribute('placeholder', i18next.t('inputPlaceholder'));
-inputLabelElement.textContent = i18next.t('inputPlaceholder');
-submitButton.textContent = i18next.t('submitBtn');
-exampleElement.textContent = i18next.t('linkExample');
-footerCreatedElement.prepend(i18next.t('footerCreated'));
-authorLinkElement.textContent = i18next.t('author');
-modalReadArticleLink.textContent = i18next.t('modalReadArticle');
-modalCloseButton.textContent = i18next.t('modalCloseBtn');
-
-export const showSuccessMessage = () => {
-  inputElement.classList.remove('is-invalid');
-  messageElement.classList.remove('text-danger');
-  messageElement.classList.add('text-success');
-  messageElement.textContent = i18next.t('successMessage');
-  formElement.reset();
+export const showSuccessMessage = (i18nextInstance) => {
+  elements.inputElement.classList.remove('is-invalid');
+  elements.messageElement.classList.remove('text-danger');
+  elements.messageElement.classList.add('text-success');
+  elements.messageElement.textContent = i18nextInstance.t('successMessage');
+  elements.formElement.reset();
 };
 
-export const showErrorMessage = (error) => {
-  inputElement.classList.add('is-invalid');
-  messageElement.classList.remove('text-success');
-  messageElement.classList.add('text-danger');
-  messageElement.textContent = i18next.t(error);
+export const showErrorMessage = (error, i18nextInstance) => {
+  elements.inputElement.classList.add('is-invalid');
+  elements.messageElement.classList.remove('text-success');
+  elements.messageElement.classList.add('text-danger');
+  elements.messageElement.textContent = i18nextInstance.t(error);
 };
 
-export const showSectionHeaders = () => {
-  feedsHeader.textContent = i18next.t('feedsHeader');
-  postsHeader.textContent = i18next.t('postsHeader');
+export const showSectionHeaders = (i18nextInstance) => {
+  elements.feedsHeader.textContent = i18nextInstance.t('feedsHeader');
+  elements.postsHeader.textContent = i18nextInstance.t('postsHeader');
 };
 
 const getTemplate = (selector) => {
@@ -89,10 +43,10 @@ const generateFeedElement = ({ title, description }) => {
 };
 
 export const addFeedElement = (data) => {
-  feedListElement.prepend(generateFeedElement(data));
+  elements.feedListElement.prepend(generateFeedElement(data));
 };
 
-const generatePostElement = ({ link, title, description }) => {
+const generatePostElement = ({ link, title, description }, i18nextInstance) => {
   const postElement = getTemplate('post');
 
   const postLink = postElement.querySelector('a');
@@ -100,14 +54,14 @@ const generatePostElement = ({ link, title, description }) => {
 
   postLink.setAttribute('href', link);
   postLink.textContent = title;
-  postBtn.textContent = i18next.t('seePostInfoBtn');
+  postBtn.textContent = i18nextInstance.t('seePostInfoBtn');
 
   let isRead = false;
 
   postBtn.addEventListener('click', () => {
-    modalHeader.textContent = title;
-    modalTextElement.textContent = description;
-    modalReadArticleLink.setAttribute('href', link);
+    elements.modalHeader.textContent = title;
+    elements.modalTextElement.textContent = description;
+    elements.modalReadArticleLink.setAttribute('href', link);
     if (!isRead) {
       isRead = true;
       postLink.classList.remove('fw-bold');
@@ -123,6 +77,6 @@ const generatePostElement = ({ link, title, description }) => {
   return postElement;
 };
 
-export const addPostElement = (data) => {
-  postsListElement.prepend(generatePostElement(data));
+export const addPostElement = (data, i18nextInstance) => {
+  elements.postsListElement.prepend(generatePostElement(data, i18nextInstance));
 };
