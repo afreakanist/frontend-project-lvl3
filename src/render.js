@@ -80,3 +80,41 @@ const generatePostElement = ({ link, title, description }, i18nextInstance) => {
 export const addPostElement = (data, i18nextInstance) => {
   elements.postsListElement.prepend(generatePostElement(data, i18nextInstance));
 };
+
+export const renderInitial = (i18nextInstance) => {
+  elements.headerElement.textContent = i18nextInstance.t('header');
+  elements.leadElement.textContent = i18nextInstance.t('lead');
+  elements.inputElement.setAttribute('placeholder', i18nextInstance.t('inputPlaceholder'));
+  elements.inputLabelElement.textContent = i18nextInstance.t('inputPlaceholder');
+  elements.submitButton.textContent = i18nextInstance.t('submitBtn');
+  elements.exampleElement.textContent = i18nextInstance.t('linkExample');
+  elements.footerCreatedElement.prepend(i18nextInstance.t('footerCreated'));
+  elements.authorLinkElement.textContent = i18nextInstance.t('author');
+  elements.modalReadArticleLink.textContent = i18nextInstance.t('modalReadArticle');
+  elements.modalCloseButton.textContent = i18nextInstance.t('modalCloseBtn');
+};
+
+export const renderChanges = (i18nextInstance) => (path, value, previousValue) => {
+  switch (path) {
+    case ('feeds'):
+      addFeedElement(value[0]);
+      break;
+    case ('posts'):
+      addPostElement(value[0], i18nextInstance);
+      break;
+    case ('ui.feedback.status'):
+      if (value === 'success') {
+        showSuccessMessage(i18nextInstance);
+      } else {
+        showErrorMessage(value, i18nextInstance);
+      }
+      break;
+    case ('ui.headers'):
+      if (value !== previousValue) {
+        showSectionHeaders(i18nextInstance);
+      }
+      break;
+    default:
+      break;
+  }
+};
