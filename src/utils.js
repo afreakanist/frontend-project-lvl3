@@ -1,19 +1,8 @@
-import { string, setLocale } from 'yup';
+import { string } from 'yup';
 import axios from 'axios';
 import { differenceWith, uniqueId } from 'lodash';
-import elements from './constants';
 
 /* eslint-disable no-param-reassign */
-
-// validation
-setLocale({
-  string: {
-    url: ({ url }) => ({ type: 'error.validation', message: 'error.invalidURL', values: { url } }),
-  },
-  mixed: {
-    notOneOf: ({ notOneOf }) => ({ type: 'error.validation', message: 'error.duplicate', values: { notOneOf } }),
-  },
-});
 
 const baseProxyUrl = 'https://allorigins.hexlet.app/get';
 
@@ -78,19 +67,19 @@ const getNewPosts = (watchedState) => {
   });
 };
 
-const updatePosts = (watchedState) => {
+export const updatePosts = (watchedState) => {
   getNewPosts(watchedState);
 
   setTimeout(updatePosts, 5000, watchedState);
 };
 
 // event handler
-export default async (event, watchedState) => {
+export const handleFormSubmit = async (event, watchedState) => {
   event.preventDefault();
 
   const urlSchema = string().trim().url().required()
     .notOneOf(watchedState.rssUrls);
-  const url = elements.inputElement.value;
+  const url = event.target.querySelector('input').value;
 
   const isValid = await urlSchema.validate(url)
     .catch((error) => {
@@ -123,6 +112,4 @@ export default async (event, watchedState) => {
         }
       });
   }
-
-  updatePosts(watchedState);
 };
