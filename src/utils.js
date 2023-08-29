@@ -1,19 +1,8 @@
-import { string, setLocale } from 'yup';
+import { string } from 'yup';
 import axios from 'axios';
 import { differenceWith, uniqueId } from 'lodash';
-import elements from './constants';
 
 /* eslint-disable no-param-reassign */
-
-// validation
-setLocale({
-  string: {
-    url: ({ url }) => ({ type: 'error.validation', message: 'error.invalidURL', values: { url } }),
-  },
-  mixed: {
-    notOneOf: ({ notOneOf }) => ({ type: 'error.validation', message: 'error.duplicate', values: { notOneOf } }),
-  },
-});
 
 const baseProxyUrl = 'https://allorigins.hexlet.app/get';
 
@@ -71,26 +60,26 @@ const getNewPosts = (watchedState) => {
       if (newPosts.length > 0) {
         const normalizedPosts = newPosts.map((post) => normalizePost(post));
         normalizedPosts.forEach((post) => {
-          watchedState.posts.unshift(post);
+          watchedState.posts = [post, ...watchedState.posts];
         });
       }
     });
   });
 };
 
-const updatePosts = (watchedState) => {
+export const updatePosts = (watchedState) => {
   getNewPosts(watchedState);
 
   setTimeout(updatePosts, 5000, watchedState);
 };
 
-// event handler
-export default async (event, watchedState) => {
+// event handlers
+export const handleFormSubmit = async (event, watchedState) => {
   event.preventDefault();
 
   const urlSchema = string().trim().url().required()
     .notOneOf(watchedState.rssUrls);
-  const url = elements.inputElement.value;
+  const url = event.target.querySelector('input').value;
 
   const isValid = await urlSchema.validate(url)
     .catch((error) => {
@@ -102,10 +91,10 @@ export default async (event, watchedState) => {
     getRSS(generateProxyUrl(url))
       .then(({ feed, posts }) => {
         watchedState.rssUrls.push(url);
-        watchedState.feeds.unshift(feed);
+        watchedState.feeds = [feed, ...watchedState.feeds];
         const normalizedPosts = posts.map((post) => normalizePost(post));
         normalizedPosts.forEach((postData) => {
-          watchedState.posts.unshift(postData);
+          watchedState.posts = [postData, ...watchedState.posts];
         });
         watchedState.ui.feedback.status = 'success';
         watchedState.ui.headers = true;
@@ -123,6 +112,12 @@ export default async (event, watchedState) => {
         }
       });
   }
+};
 
-  updatePosts(watchedState);
+export const handlePostClick = (event, watchedState) => {
+  const { postId } = event.target.dataset;
+  if (!postId) return;
+
+  watchedState.ui.viewedPosts = [postId, ...watchedState.ui.viewedPosts];
+  watchedState.ui.previewInModal = watchedState.posts.find(({ id }) => id === postId);
 };
