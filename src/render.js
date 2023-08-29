@@ -48,7 +48,7 @@ const addFeedElement = (data, { feedListElement }) => {
   feedListElement.prepend(generateFeedElement(data));
 };
 
-const generatePostElement = ({ link, title, description }, i18nextInstance, elements) => {
+const generatePostElement = ({ link, title, id }, i18nextInstance) => {
   const postElement = getTemplate('post');
 
   const postLink = postElement.querySelector('a');
@@ -56,31 +56,27 @@ const generatePostElement = ({ link, title, description }, i18nextInstance, elem
 
   postLink.setAttribute('href', link);
   postLink.textContent = title;
+  postLink.setAttribute('data-post-id', id);
   postBtn.textContent = i18nextInstance.t('seePostInfoBtn');
-
-  let isRead = false;
-
-  postBtn.addEventListener('click', () => {
-    elements.modalHeader.textContent = title;
-    elements.modalTextElement.textContent = description;
-    elements.modalReadArticleLink.setAttribute('href', link);
-    if (!isRead) {
-      isRead = true;
-      postLink.classList.remove('fw-bold');
-      postLink.classList.add('link-secondary');
-    }
-  });
-
-  postLink.addEventListener('click', () => {
-    postLink.classList.remove('fw-bold');
-    postLink.classList.add('link-secondary');
-  }, { once: true });
+  postBtn.setAttribute('data-post-id', id);
 
   return postElement;
 };
 
 const addPostElement = (data, i18nextInstance, elements) => {
-  elements.postsListElement.prepend(generatePostElement(data, i18nextInstance, elements));
+  elements.postsListElement.prepend(generatePostElement(data, i18nextInstance));
+};
+
+const markPostAsRead = (postId) => {
+  const postLink = document.querySelector(`a[data-post-id="${postId}"]`);
+  postLink.classList.remove('fw-bold');
+  postLink.classList.add('link-secondary');
+};
+
+const fillInModalPreview = ({ title, description, link }, elements) => {
+  elements.modalHeader.textContent = title;
+  elements.modalTextElement.textContent = description;
+  elements.modalReadArticleLink.setAttribute('href', link);
 };
 
 const renderChanges = (elements, i18nextInstance) => (path, value, previousValue) => {
@@ -102,6 +98,12 @@ const renderChanges = (elements, i18nextInstance) => (path, value, previousValue
       if (value !== previousValue) {
         showSectionHeaders(i18nextInstance, elements);
       }
+      break;
+    case ('ui.previewInModal'):
+      fillInModalPreview(value, elements);
+      break;
+    case ('ui.viewedPosts'):
+      markPostAsRead(value[0]);
       break;
     default:
       break;

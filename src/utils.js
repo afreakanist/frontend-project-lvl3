@@ -60,7 +60,7 @@ const getNewPosts = (watchedState) => {
       if (newPosts.length > 0) {
         const normalizedPosts = newPosts.map((post) => normalizePost(post));
         normalizedPosts.forEach((post) => {
-          watchedState.posts.unshift(post);
+          watchedState.posts = [post, ...watchedState.posts];
         });
       }
     });
@@ -73,7 +73,7 @@ export const updatePosts = (watchedState) => {
   setTimeout(updatePosts, 5000, watchedState);
 };
 
-// event handler
+// event handlers
 export const handleFormSubmit = async (event, watchedState) => {
   event.preventDefault();
 
@@ -91,10 +91,10 @@ export const handleFormSubmit = async (event, watchedState) => {
     getRSS(generateProxyUrl(url))
       .then(({ feed, posts }) => {
         watchedState.rssUrls.push(url);
-        watchedState.feeds.unshift(feed);
+        watchedState.feeds = [feed, ...watchedState.feeds];
         const normalizedPosts = posts.map((post) => normalizePost(post));
         normalizedPosts.forEach((postData) => {
-          watchedState.posts.unshift(postData);
+          watchedState.posts = [postData, ...watchedState.posts];
         });
         watchedState.ui.feedback.status = 'success';
         watchedState.ui.headers = true;
@@ -112,4 +112,12 @@ export const handleFormSubmit = async (event, watchedState) => {
         }
       });
   }
+};
+
+export const handlePostClick = (event, watchedState) => {
+  const { postId } = event.target.dataset;
+  if (!postId) return;
+
+  watchedState.ui.viewedPosts = [postId, ...watchedState.ui.viewedPosts];
+  watchedState.ui.previewInModal = watchedState.posts.find(({ id }) => id === postId);
 };

@@ -1,6 +1,6 @@
 import i18next from 'i18next';
 import { setLocale } from 'yup';
-import { handleFormSubmit, updatePosts } from './utils';
+import { handleFormSubmit, handlePostClick, updatePosts } from './utils';
 import renderInitial from './render';
 import en from './locales/en';
 import ru from './locales/ru';
@@ -15,6 +15,8 @@ export default async function app() {
         status: '',
       },
       headers: false,
+      previewInModal: null,
+      viewedPosts: [],
     },
   };
 
@@ -62,6 +64,7 @@ export default async function app() {
     const watchedState = renderInitial(state, elements, i18nextInstance);
 
     elements.formElement.addEventListener('submit', (event) => handleFormSubmit(event, watchedState));
+    elements.postsListElement.addEventListener('click', (event) => handlePostClick(event, watchedState));
 
     updatePosts(watchedState);
   });
