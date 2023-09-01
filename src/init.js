@@ -16,7 +16,7 @@ export default async function app() {
       },
       headers: false,
       previewInModal: null,
-      viewedPosts: [],
+      viewedPosts: new Set(),
     },
   };
 

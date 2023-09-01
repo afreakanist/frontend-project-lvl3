@@ -37,7 +37,7 @@ const parseRSSData = (data) => {
 
   return {
     feed: { title, description },
-    posts: [...posts],
+    posts,
   };
 };
 
@@ -51,27 +51,26 @@ const getRSS = (url) => axios.get(url)
 
 const getNewPosts = (watchedState) => {
   watchedState.rssUrls.forEach((url) => {
-    getRSS(generateProxyUrl(url)).then(({ posts }) => {
-      const newPosts = differenceWith(
-        posts,
-        watchedState.posts,
-        (newPost, savedPost) => newPost.title === savedPost.title,
-      );
-      if (newPosts.length > 0) {
-        const normalizedPosts = newPosts.map((post) => normalizePost(post));
-        normalizedPosts.forEach((post) => {
-          watchedState.posts = [post, ...watchedState.posts];
-        });
-      }
-    });
+    getRSS(generateProxyUrl(url))
+      .then(({ posts }) => {
+        const newPosts = differenceWith(
+          posts,
+          watchedState.posts,
+          (newPost, savedPost) => newPost.title === savedPost.title,
+        );
+        if (newPosts.length > 0) {
+          const normalizedPosts = newPosts.map((post) => normalizePost(post));
+          watchedState.posts = [...normalizedPosts, ...watchedState.posts];
+        }
+      });
   });
 };
 
 export const updatePosts = (watchedState) => {
   getNewPosts(watchedState);
-  const delay = 5000;
+  const delayMs = 5000;
 
-  setTimeout(updatePosts, delay, watchedState);
+  setTimeout(updatePosts, delayMs, watchedState);
 };
 
 // event handlers
@@ -94,9 +93,7 @@ export const handleFormSubmit = async (event, watchedState) => {
         watchedState.rssUrls.push(url);
         watchedState.feeds = [feed, ...watchedState.feeds];
         const normalizedPosts = posts.map((post) => normalizePost(post));
-        normalizedPosts.forEach((postData) => {
-          watchedState.posts = [postData, ...watchedState.posts];
-        });
+        watchedState.posts = [...normalizedPosts, ...watchedState.posts];
         watchedState.ui.feedback.status = 'success';
         watchedState.ui.headers = true;
       })
@@ -119,6 +116,6 @@ export const handlePostClick = (event, watchedState) => {
   const { postId } = event.target.dataset;
   if (!postId) return;
 
-  watchedState.ui.viewedPosts = [postId, ...watchedState.ui.viewedPosts];
+  watchedState.ui.viewedPosts.add(postId);
   watchedState.ui.previewInModal = watchedState.posts.find(({ id }) => id === postId);
 };
