@@ -69,8 +69,9 @@ const getNewPosts = (watchedState) => {
 
 export const updatePosts = (watchedState) => {
   getNewPosts(watchedState);
+  const delay = 5000;
 
-  setTimeout(updatePosts, 5000, watchedState);
+  setTimeout(updatePosts, delay, watchedState);
 };
 
 // event handlers
