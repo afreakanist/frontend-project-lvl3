@@ -49,28 +49,48 @@ const normalizePost = (post) => ({
 const getRSS = (url) => axios.get(url)
   .then((response) => parseRSSData(response.data.contents));
 
-const getNewPosts = (watchedState) => {
-  watchedState.rssUrls.forEach((url) => {
-    getRSS(generateProxyUrl(url))
-      .then(({ posts }) => {
-        const newPosts = differenceWith(
-          posts,
-          watchedState.posts,
-          (newPost, savedPost) => newPost.title === savedPost.title,
-        );
-        if (newPosts.length > 0) {
-          const normalizedPosts = newPosts.map((post) => normalizePost(post));
-          watchedState.posts = [...normalizedPosts, ...watchedState.posts];
-        }
-      });
-  });
+const handleError = (error, watchedState) => {
+  if (axios.isAxiosError(error)) {
+    watchedState.ui.feedback.status = 'error.network';
+    console.error(error);
+  } else if (error.isParsingError) {
+    watchedState.ui.feedback.status = 'error.parsing';
+    console.error(error);
+  } else {
+    watchedState.ui.feedback.status = 'error.generic';
+    console.error(error);
+  }
 };
 
-export const updatePosts = (watchedState) => {
-  getNewPosts(watchedState);
+const getNewPosts = (watchedState) => {
+  const parsedRssData = watchedState.rssUrls.map((url) => getRSS(generateProxyUrl(url)));
+  return Promise.all(parsedRssData)
+    .then((data) => {
+      const posts = data.flatMap((item) => item.posts);
+      const newPosts = differenceWith(
+        posts,
+        watchedState.posts,
+        (newPost, savedPost) => newPost.title === savedPost.title,
+      );
+      if (newPosts.length > 0) {
+        const normalizedPosts = newPosts.map((post) => normalizePost(post));
+        watchedState.posts = [...normalizedPosts, ...watchedState.posts];
+      }
+    })
+    .catch((error) => {
+      handleError(error, watchedState);
+    });
+};
+
+const updatePosts = (watchedState) => {
   const delayMs = 5000;
 
-  setTimeout(updatePosts, delayMs, watchedState);
+  setTimeout(() => {
+    getNewPosts(watchedState)
+      .finally(() => {
+        updatePosts(watchedState);
+      });
+  }, delayMs);
 };
 
 // event handlers
@@ -97,17 +117,11 @@ export const handleFormSubmit = async (event, watchedState) => {
         watchedState.ui.feedback.status = 'success';
         watchedState.ui.headers = true;
       })
+      .then(() => {
+        updatePosts(watchedState);
+      })
       .catch((error) => {
-        if (axios.isAxiosError(error)) {
-          watchedState.ui.feedback.status = 'error.network';
-          console.error(error);
-        } else if (error.isParsingError) {
-          watchedState.ui.feedback.status = 'error.parsing';
-          console.error(error);
-        } else {
-          watchedState.ui.feedback.status = 'error.generic';
-          console.error(error);
-        }
+        handleError(error, watchedState);
       });
   }
 };

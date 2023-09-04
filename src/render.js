@@ -91,7 +91,7 @@ const fillInModalPreview = ({ title, description, link }, elements) => {
   elements.modalReadArticleLink.setAttribute('href', link);
 };
 
-const renderChanges = (state, elements, i18nextInstance) => (path, value, previousValue) => {
+const renderChanges = (state, elements, i18nextInstance) => (path, value) => {
   switch (path) {
     case ('feeds'):
       renderFeedElements(value, elements);
@@ -107,9 +107,7 @@ const renderChanges = (state, elements, i18nextInstance) => (path, value, previo
       }
       break;
     case ('ui.headers'):
-      if (value !== previousValue) {
-        showSectionHeaders(i18nextInstance, elements);
-      }
+      showSectionHeaders(i18nextInstance, elements);
       break;
     case ('ui.previewInModal'):
       fillInModalPreview(value, elements);
