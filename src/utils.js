@@ -37,7 +37,7 @@ const parseRSSData = (data) => {
 
   return {
     feed: { title, description },
-    posts: [...posts],
+    posts,
   };
 };
 
@@ -49,9 +49,26 @@ const normalizePost = (post) => ({
 const getRSS = (url) => axios.get(url)
   .then((response) => parseRSSData(response.data.contents));
 
+const handleError = (error, watchedState) => {
+  watchedState.ui.form.isValid = false;
+  watchedState.ui.form.status = 'error';
+  if (axios.isAxiosError(error)) {
+    watchedState.ui.feedback.status = 'error.network';
+    console.error(error);
+  } else if (error.isParsingError) {
+    watchedState.ui.feedback.status = 'error.parsing';
+    console.error(error);
+  } else {
+    watchedState.ui.feedback.status = 'error.generic';
+    console.error(error);
+  }
+};
+
 const getNewPosts = (watchedState) => {
-  watchedState.rssUrls.forEach((url) => {
-    getRSS(generateProxyUrl(url)).then(({ posts }) => {
+  const parsedRssData = watchedState.rssUrls.map((url) => getRSS(generateProxyUrl(url)));
+  return Promise.all(parsedRssData)
+    .then((data) => {
+      const posts = data.flatMap((item) => item.posts);
       const newPosts = differenceWith(
         posts,
         watchedState.posts,
@@ -59,23 +76,30 @@ const getNewPosts = (watchedState) => {
       );
       if (newPosts.length > 0) {
         const normalizedPosts = newPosts.map((post) => normalizePost(post));
-        normalizedPosts.forEach((post) => {
-          watchedState.posts = [post, ...watchedState.posts];
-        });
+        watchedState.posts = [...normalizedPosts, ...watchedState.posts];
       }
+    })
+    .catch((error) => {
+      handleError(error, watchedState);
     });
-  });
 };
 
-export const updatePosts = (watchedState) => {
-  getNewPosts(watchedState);
+const updatePosts = (watchedState) => {
+  const delayMs = 5000;
 
-  setTimeout(updatePosts, 5000, watchedState);
+  setTimeout(() => {
+    getNewPosts(watchedState)
+      .finally(() => {
+        updatePosts(watchedState);
+      });
+  }, delayMs);
 };
 
 // event handlers
 export const handleFormSubmit = async (event, watchedState) => {
   event.preventDefault();
+
+  watchedState.ui.form.status = 'pending';
 
   const urlSchema = string().trim().url().required()
     .notOneOf(watchedState.rssUrls);
@@ -85,6 +109,8 @@ export const handleFormSubmit = async (event, watchedState) => {
     .catch((error) => {
       const { message } = error.errors[0];
       watchedState.ui.feedback.status = message;
+      watchedState.ui.form.isValid = false;
+      watchedState.ui.form.status = 'error';
     });
 
   if (isValid) {
@@ -93,23 +119,17 @@ export const handleFormSubmit = async (event, watchedState) => {
         watchedState.rssUrls.push(url);
         watchedState.feeds = [feed, ...watchedState.feeds];
         const normalizedPosts = posts.map((post) => normalizePost(post));
-        normalizedPosts.forEach((postData) => {
-          watchedState.posts = [postData, ...watchedState.posts];
-        });
+        watchedState.posts = [...normalizedPosts, ...watchedState.posts];
         watchedState.ui.feedback.status = 'success';
+        watchedState.ui.form.isValid = true;
+        watchedState.ui.form.status = 'ready';
         watchedState.ui.headers = true;
       })
+      .then(() => {
+        updatePosts(watchedState);
+      })
       .catch((error) => {
-        if (axios.isAxiosError(error)) {
-          watchedState.ui.feedback.status = 'error.network';
-          console.error(error);
-        } else if (error.isParsingError) {
-          watchedState.ui.feedback.status = 'error.parsing';
-          console.error(error);
-        } else {
-          watchedState.ui.feedback.status = 'error.generic';
-          console.error(error);
-        }
+        handleError(error, watchedState);
       });
   }
 };
@@ -118,6 +138,6 @@ export const handlePostClick = (event, watchedState) => {
   const { postId } = event.target.dataset;
   if (!postId) return;
 
-  watchedState.ui.viewedPosts = [postId, ...watchedState.ui.viewedPosts];
+  watchedState.ui.viewedPosts.add(postId);
   watchedState.ui.previewInModal = watchedState.posts.find(({ id }) => id === postId);
 };

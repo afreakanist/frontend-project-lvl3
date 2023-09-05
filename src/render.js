@@ -3,18 +3,40 @@ import onChange from 'on-change';
 /* eslint-disable no-param-reassign */
 
 const showSuccessMessage = (i18nextInstance, elements) => {
-  elements.inputElement.classList.remove('is-invalid');
   elements.messageElement.classList.remove('text-danger');
   elements.messageElement.classList.add('text-success');
   elements.messageElement.textContent = i18nextInstance.t('successMessage');
-  elements.formElement.reset();
 };
 
 const showErrorMessage = (error, i18nextInstance, elements) => {
-  elements.inputElement.classList.add('is-invalid');
   elements.messageElement.classList.remove('text-success');
   elements.messageElement.classList.add('text-danger');
   elements.messageElement.textContent = i18nextInstance.t(error);
+};
+
+const renderForm = (formStatus, isValid, { formElement, inputElement, submitButton }) => {
+  if (isValid) {
+    inputElement.classList.remove('is-invalid');
+  } else {
+    inputElement.classList.add('is-invalid');
+  }
+
+  if (formStatus === 'ready') {
+    formElement.reset();
+    inputElement.focus();
+  }
+
+  if (formStatus === 'pending') {
+    inputElement.readOnly = true;
+    submitButton.disabled = true;
+  } else {
+    inputElement.readOnly = false;
+    submitButton.disabled = false;
+  }
+
+  if (formStatus === 'error') {
+    inputElement.focus();
+  }
 };
 
 const showSectionHeaders = (i18nextInstance, elements) => {
@@ -44,11 +66,19 @@ const generateFeedElement = ({ title, description }) => {
   return feedElement;
 };
 
-const addFeedElement = (data, { feedListElement }) => {
-  feedListElement.prepend(generateFeedElement(data));
+const renderFeedElements = (feedsData, { feedListElement }) => {
+  feedListElement.innerHTML = '';
+  feedsData.forEach((item) => {
+    feedListElement.append(generateFeedElement(item));
+  });
 };
 
-const generatePostElement = ({ link, title, id }, i18nextInstance) => {
+const markPostAsRead = (postLinkElem) => {
+  postLinkElem.classList.remove('fw-bold');
+  postLinkElem.classList.add('link-secondary');
+};
+
+const generatePostElement = ({ link, title, id }, i18nextInstance, isRead) => {
   const postElement = getTemplate('post');
 
   const postLink = postElement.querySelector('a');
@@ -57,20 +87,24 @@ const generatePostElement = ({ link, title, id }, i18nextInstance) => {
   postLink.setAttribute('href', link);
   postLink.textContent = title;
   postLink.setAttribute('data-post-id', id);
+  if (isRead) markPostAsRead(postLink);
+
   postBtn.textContent = i18nextInstance.t('seePostInfoBtn');
   postBtn.setAttribute('data-post-id', id);
 
   return postElement;
 };
 
-const addPostElement = (data, i18nextInstance, elements) => {
-  elements.postsListElement.prepend(generatePostElement(data, i18nextInstance));
-};
-
-const markPostAsRead = (postId) => {
-  const postLink = document.querySelector(`a[data-post-id="${postId}"]`);
-  postLink.classList.remove('fw-bold');
-  postLink.classList.add('link-secondary');
+const renderPostElements = (
+  { posts, ui: { viewedPosts } },
+  i18nextInstance,
+  { postsListElement },
+) => {
+  postsListElement.innerHTML = '';
+  posts.forEach((item) => {
+    const isRead = viewedPosts.has(item.id);
+    postsListElement.append(generatePostElement(item, i18nextInstance, isRead));
+  });
 };
 
 const fillInModalPreview = ({ title, description, link }, elements) => {
@@ -79,13 +113,13 @@ const fillInModalPreview = ({ title, description, link }, elements) => {
   elements.modalReadArticleLink.setAttribute('href', link);
 };
 
-const renderChanges = (elements, i18nextInstance) => (path, value, previousValue) => {
+const renderChanges = (state, elements, i18nextInstance) => (path, value) => {
   switch (path) {
     case ('feeds'):
-      addFeedElement(value[0], elements);
+      renderFeedElements(value, elements);
       break;
     case ('posts'):
-      addPostElement(value[0], i18nextInstance, elements);
+      renderPostElements(state, i18nextInstance, elements);
       break;
     case ('ui.feedback.status'):
       if (value === 'success') {
@@ -94,16 +128,17 @@ const renderChanges = (elements, i18nextInstance) => (path, value, previousValue
         showErrorMessage(value, i18nextInstance, elements);
       }
       break;
+    case ('ui.form.status' || 'ui.form.isValid'):
+      renderForm(state.ui.form.status, state.ui.form.isValid, elements);
+      break;
     case ('ui.headers'):
-      if (value !== previousValue) {
-        showSectionHeaders(i18nextInstance, elements);
-      }
+      showSectionHeaders(i18nextInstance, elements);
       break;
     case ('ui.previewInModal'):
       fillInModalPreview(value, elements);
       break;
     case ('ui.viewedPosts'):
-      markPostAsRead(value[0]);
+      renderPostElements(state, i18nextInstance, elements);
       break;
     default:
       break;
@@ -122,5 +157,5 @@ export default (state, elements, i18nextInstance) => {
   elements.modalReadArticleLink.textContent = i18nextInstance.t('modalReadArticle');
   elements.modalCloseButton.textContent = i18nextInstance.t('modalCloseBtn');
 
-  return onChange(state, renderChanges(elements, i18nextInstance));
+  return onChange(state, renderChanges(state, elements, i18nextInstance));
 };
