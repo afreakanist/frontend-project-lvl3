@@ -50,6 +50,8 @@ const getRSS = (url) => axios.get(url)
   .then((response) => parseRSSData(response.data.contents));
 
 const handleError = (error, watchedState) => {
+  watchedState.ui.form.isValid = false;
+  watchedState.ui.form.status = 'error';
   if (axios.isAxiosError(error)) {
     watchedState.ui.feedback.status = 'error.network';
     console.error(error);
@@ -97,6 +99,8 @@ const updatePosts = (watchedState) => {
 export const handleFormSubmit = async (event, watchedState) => {
   event.preventDefault();
 
+  watchedState.ui.form.status = 'pending';
+
   const urlSchema = string().trim().url().required()
     .notOneOf(watchedState.rssUrls);
   const url = event.target.querySelector('input').value;
@@ -105,6 +109,8 @@ export const handleFormSubmit = async (event, watchedState) => {
     .catch((error) => {
       const { message } = error.errors[0];
       watchedState.ui.feedback.status = message;
+      watchedState.ui.form.isValid = false;
+      watchedState.ui.form.status = 'error';
     });
 
   if (isValid) {
@@ -115,6 +121,8 @@ export const handleFormSubmit = async (event, watchedState) => {
         const normalizedPosts = posts.map((post) => normalizePost(post));
         watchedState.posts = [...normalizedPosts, ...watchedState.posts];
         watchedState.ui.feedback.status = 'success';
+        watchedState.ui.form.isValid = true;
+        watchedState.ui.form.status = 'ready';
         watchedState.ui.headers = true;
       })
       .then(() => {

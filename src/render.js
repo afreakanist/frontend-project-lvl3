@@ -3,18 +3,40 @@ import onChange from 'on-change';
 /* eslint-disable no-param-reassign */
 
 const showSuccessMessage = (i18nextInstance, elements) => {
-  elements.inputElement.classList.remove('is-invalid');
   elements.messageElement.classList.remove('text-danger');
   elements.messageElement.classList.add('text-success');
   elements.messageElement.textContent = i18nextInstance.t('successMessage');
-  elements.formElement.reset();
 };
 
 const showErrorMessage = (error, i18nextInstance, elements) => {
-  elements.inputElement.classList.add('is-invalid');
   elements.messageElement.classList.remove('text-success');
   elements.messageElement.classList.add('text-danger');
   elements.messageElement.textContent = i18nextInstance.t(error);
+};
+
+const renderForm = (formStatus, isValid, { formElement, inputElement, submitButton }) => {
+  if (isValid) {
+    inputElement.classList.remove('is-invalid');
+  } else {
+    inputElement.classList.add('is-invalid');
+  }
+
+  if (formStatus === 'ready') {
+    formElement.reset();
+    inputElement.focus();
+  }
+
+  if (formStatus === 'pending') {
+    inputElement.readOnly = true;
+    submitButton.disabled = true;
+  } else {
+    inputElement.readOnly = false;
+    submitButton.disabled = false;
+  }
+
+  if (formStatus === 'error') {
+    inputElement.focus();
+  }
 };
 
 const showSectionHeaders = (i18nextInstance, elements) => {
@@ -105,6 +127,9 @@ const renderChanges = (state, elements, i18nextInstance) => (path, value) => {
       } else {
         showErrorMessage(value, i18nextInstance, elements);
       }
+      break;
+    case ('ui.form.status' || 'ui.form.isValid'):
+      renderForm(state.ui.form.status, state.ui.form.isValid, elements);
       break;
     case ('ui.headers'):
       showSectionHeaders(i18nextInstance, elements);

@@ -11,6 +11,10 @@ export default async function app() {
     feeds: [],
     posts: [],
     ui: {
+      form: {
+        status: '',
+        isValid: true,
+      },
       feedback: {
         status: '',
       },
