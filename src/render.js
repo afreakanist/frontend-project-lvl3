@@ -14,19 +14,19 @@ const showErrorMessage = (error, i18nextInstance, elements) => {
   elements.messageElement.textContent = i18nextInstance.t(error);
 };
 
-const renderForm = (formStatus, isValid, { formElement, inputElement, submitButton }) => {
+const renderForm = ({ status, isValid }, { formElement, inputElement, submitButton }) => {
   if (isValid) {
     inputElement.classList.remove('is-invalid');
   } else {
     inputElement.classList.add('is-invalid');
   }
 
-  if (formStatus === 'ready') {
+  if (status === 'ready') {
     formElement.reset();
     inputElement.focus();
   }
 
-  if (formStatus === 'pending') {
+  if (status === 'pending') {
     inputElement.readOnly = true;
     submitButton.disabled = true;
   } else {
@@ -34,7 +34,7 @@ const renderForm = (formStatus, isValid, { formElement, inputElement, submitButt
     submitButton.disabled = false;
   }
 
-  if (formStatus === 'error') {
+  if (status === 'error') {
     inputElement.focus();
   }
 };
@@ -115,29 +115,30 @@ const fillInModalPreview = ({ title, description, link }, elements) => {
 
 const renderChanges = (state, elements, i18nextInstance) => (path, value) => {
   switch (path) {
-    case ('feeds'):
+    case 'feeds':
       renderFeedElements(value, elements);
       break;
-    case ('posts'):
+    case 'posts':
       renderPostElements(state, i18nextInstance, elements);
       break;
-    case ('ui.feedback.status'):
+    case 'ui.feedback.status':
       if (value === 'success') {
         showSuccessMessage(i18nextInstance, elements);
       } else {
         showErrorMessage(value, i18nextInstance, elements);
       }
       break;
-    case ('ui.form.status' || 'ui.form.isValid'):
-      renderForm(state.ui.form.status, state.ui.form.isValid, elements);
+    case 'ui.form.status':
+    case 'ui.form.isValid':
+      renderForm(state.ui.form, elements);
       break;
-    case ('ui.headers'):
+    case 'ui.headers':
       showSectionHeaders(i18nextInstance, elements);
       break;
-    case ('ui.previewInModal'):
+    case 'ui.previewInModal':
       fillInModalPreview(value, elements);
       break;
-    case ('ui.viewedPosts'):
+    case 'ui.viewedPosts':
       renderPostElements(state, i18nextInstance, elements);
       break;
     default:
