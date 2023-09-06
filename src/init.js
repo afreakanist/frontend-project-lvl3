@@ -10,13 +10,15 @@ export default async function app() {
     rssUrls: [],
     feeds: [],
     posts: [],
+    loadingProcess: {
+      status: 'idle',
+      error: null,
+    },
     ui: {
       form: {
-        status: '',
+        status: 'ready',
         isValid: true,
-      },
-      feedback: {
-        status: '',
+        error: null,
       },
       headers: false,
       previewInModal: null,

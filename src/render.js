@@ -121,12 +121,12 @@ const renderChanges = (state, elements, i18nextInstance) => (path, value) => {
     case 'posts':
       renderPostElements(state, i18nextInstance, elements);
       break;
-    case 'ui.feedback.status':
-      if (value === 'success') {
-        showSuccessMessage(i18nextInstance, elements);
-      } else {
-        showErrorMessage(value, i18nextInstance, elements);
-      }
+    case 'loadingProcess.status':
+      if (value === 'success') showSuccessMessage(i18nextInstance, elements);
+      break;
+    case 'loadingProcess.error':
+    case 'ui.form.error':
+      if (value) showErrorMessage(value, i18nextInstance, elements);
       break;
     case 'ui.form.status':
     case 'ui.form.isValid':
