@@ -84,7 +84,7 @@ const getNewPosts = (watchedState) => {
     });
 };
 
-const updatePosts = (watchedState) => {
+export const updatePosts = (watchedState) => {
   const delayMs = 5000;
 
   setTimeout(() => {
@@ -127,9 +127,6 @@ export const handleFormSubmit = async (event, watchedState) => {
         watchedState.loadingProcess.status = 'success';
         watchedState.ui.form.status = 'ready';
         watchedState.ui.headers = true;
-      })
-      .then(() => {
-        updatePosts(watchedState);
       })
       .catch((error) => {
         handleError(error, watchedState);
