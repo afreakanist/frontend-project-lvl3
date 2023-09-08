@@ -65,8 +65,6 @@ const handleError = (error, watchedState) => {
 };
 
 const getNewPosts = (watchedState) => {
-  watchedState.loadingProcess.error = null;
-  watchedState.loadingProcess.status = 'pending';
   const parsedRssData = watchedState.rssUrls.map((url) => getRSS(generateProxyUrl(url)));
   return Promise.all(parsedRssData)
     .then((data) => {
@@ -80,11 +78,9 @@ const getNewPosts = (watchedState) => {
         const normalizedPosts = newPosts.map((post) => normalizePost(post));
         watchedState.posts = [...normalizedPosts, ...watchedState.posts];
       }
-      watchedState.loadingProcess.error = null;
-      watchedState.loadingProcess.status = 're-success';
     })
     .catch((error) => {
-      handleError(error, watchedState);
+      console.log(error);
     });
 };
 
